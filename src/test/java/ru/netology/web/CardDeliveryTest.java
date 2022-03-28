@@ -54,7 +54,7 @@ public class CardDeliveryTest {
     void shouldSubmitValidFormComplexElements() {
         String city = "Казань";
         String deliveryDate = setDeliveryDate(7); // задаем дату доставки через неделю
-        Integer dayOfDelivery = Integer.parseInt(deliveryDate.substring(0, 1)); // получаем число месяца из даты доставки
+        Integer dayOfDelivery = Integer.parseInt(deliveryDate.substring(0, 2)); // получаем число месяца из даты доставки
         String notificationText = "Встреча успешно забронирована на " + deliveryDate;
 
         SelenideElement form = $(".form");
