@@ -31,7 +31,7 @@ public class CardDeliveryTest {
     @Test
     void shouldSubmitValidForm() {
         String deliveryDate = setDeliveryDate(5); // переносим доставку с сегодняшней даты на несколько дней (минимум 3)
-        String notificationText = "Встреча успешно забронирована на" + deliveryDate;
+        String notificationText = "Встреча успешно забронирована на " + deliveryDate;
 
         SelenideElement form = $(".form");
         form.$("[data-test-id=city] input").val("Нарьян-Мар");
