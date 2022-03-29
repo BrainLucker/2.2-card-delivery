@@ -5,26 +5,22 @@ import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 
 public class CardDeliveryTest {
 
-    String setDeliveryDate(int fewDays) {
-        Calendar calendar = new GregorianCalendar();
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-        calendar.add(Calendar.DAY_OF_MONTH, fewDays);
-        return formatter.format(calendar.getTime());
+    String setDeliveryDate(long daysToAdd) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return LocalDate.now().plusDays(daysToAdd).format(formatter);
     }
 
-    boolean isNextMonth(Integer dayOfDelivery) {
-        Calendar calendar = new GregorianCalendar();
-        int today = calendar.get(Calendar.DAY_OF_MONTH);
-        return (dayOfDelivery < today);
+    boolean isNextMonth(String deliveryDate, String defaultDate) {
+        return !(deliveryDate.substring(4, 6).equals(defaultDate.substring(4, 6)));
     }
 
     @BeforeEach
@@ -52,17 +48,18 @@ public class CardDeliveryTest {
 
     @Test
     void shouldSubmitValidFormComplexElements() {
-        String city = "Казань";
-        String deliveryDate = setDeliveryDate(7); // задаем дату доставки через неделю
-        Integer dayOfDelivery = Integer.parseInt(deliveryDate.substring(0, 2)); // получаем число месяца из даты доставки
-        String notificationText = "Встреча успешно забронирована на " + deliveryDate;
-
         SelenideElement form = $(".form");
         SelenideElement calendar = $(".popup .calendar");
+
+        String city = "Казань";
+        String deliveryDate = setDeliveryDate(7); // задаем дату доставки через неделю
+        Integer dayOfDelivery = Integer.parseInt(deliveryDate, 0, 2, 10); // получаем число месяца из даты доставки
+        String defaultDate = form.$("[data-test-id=date] input.input__control").getAttribute("value"); // получаем из виджета дату доставки по-умолчанию
+        String notificationText = "Встреча успешно забронирована на " + deliveryDate;
         form.$("[data-test-id=city] input").val(city.substring(0, 2)); // вводим первые две буквы города
         $$(".input__popup .menu-item__control").find(exactText(city)).click();
         form.$("[data-test-id=date] button").click();
-        if (isNextMonth(dayOfDelivery)) { // проверяем нужно ли перелистнуть на следующий месяц в виджете календаря
+        if (isNextMonth(deliveryDate, defaultDate)) { // проверяем нужно ли перелистнуть на следующий месяц в виджете календаря
             calendar.$("[data-step='1']").click();
         }
         calendar.$$(".calendar__day").find(exactText(dayOfDelivery.toString())).click();
